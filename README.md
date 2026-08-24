@@ -11,24 +11,56 @@ token.
 
 ### Claude Code
 
+Two commands. You can paste them, or ask Claude to run them for you: they are
+ordinary shell commands and Claude can run both.
+
 ```bash
 claude mcp add --transport http --scope user withgrace https://withgrace.getaddis.im/mcp
+claude mcp login withgrace
 ```
 
-Then run `claude`, and approve the sign in when it offers. A browser opens,
-you sign in, and you are connected. Nothing to copy and nothing to edit.
+The first registers the connector. The second opens a browser, where you sign
+in. That sign in is the one step nobody can do on your behalf, because it is
+your password. Everything either side of it is automatic: the client registers
+itself, generates its own keys, and stores the result.
 
-`--scope user` makes it available in every project. Drop it to add the
-connector to the current project only, which then asks you to trust the
-project first.
+`--scope user` makes the connector available in every project. Drop it to add
+it to the current project only, which then asks you to trust the project first.
+
+Check it worked:
+
+```bash
+claude mcp list
+```
+
+You want `✔ Connected`. `! Needs authentication` means the login has not
+finished yet.
+
+#### Over SSH, or anywhere without a browser
+
+```bash
+claude mcp login withgrace --no-browser
+```
+
+It prints a URL. Open it on any machine that has a browser, sign in, and paste
+the address you land on back into the terminal. This needs a real terminal, so
+it will not work from inside an assistant.
 
 No account yet? Sign up at
 [withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
 starts empty and sees only its own records.
 
-### Claude Desktop
+### Claude, on the web or desktop
 
-`Settings`, `Developer`, `Edit Config`:
+`Settings`, `Connectors`, `Add custom connector`, and paste:
+
+```
+https://withgrace.getaddis.im/mcp
+```
+
+Then connect, and sign in when prompted.
+
+For Claude Desktop you can edit the config directly instead:
 
 ```json
 {
@@ -115,7 +147,14 @@ a screenshot or a repository.
 config. Restart it, and check the file is valid JSON or TOML.
 
 **Every call is refused.** The connection was revoked, or sign in never
-completed. Remove the server from your client and add it again.
+completed. Run `claude mcp login withgrace` again, or remove the server and add
+it back.
+
+**`Failed to connect` with an HTTP code.** The client could not reach the
+connector at all. Check the URL is exactly `https://withgrace.getaddis.im/mcp`.
+
+**`Pending approval`.** The connector was added to a project rather than to
+you. Run `claude` and approve it, or add it again with `--scope user`.
 
 **A tool returns nothing.** There are no records of that kind for your account
 yet. Add one on the site or ask the assistant to create it.
