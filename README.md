@@ -12,10 +12,15 @@ token.
 ### Claude Code
 
 ```bash
-claude mcp add --transport http withgrace https://withgrace.getaddis.im/mcp
+claude mcp add --transport http --scope user withgrace https://withgrace.getaddis.im/mcp
 ```
 
-A browser opens. Sign in, and you are connected. Nothing to copy.
+Then run `claude`, and approve the sign in when it offers. A browser opens,
+you sign in, and you are connected. Nothing to copy and nothing to edit.
+
+`--scope user` makes it available in every project. Drop it to add the
+connector to the current project only, which then asks you to trust the
+project first.
 
 No account yet? Sign up at
 [withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
