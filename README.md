@@ -7,58 +7,57 @@ and let it update records for you.
 Nothing runs on your machine. The connector is hosted, so setup is a URL and a
 token.
 
-## 1. Create a token
-
-1. Sign in at [withgrace.getaddis.im](https://withgrace.getaddis.im)
-2. Open **Connect**
-3. Name the token after wherever you are going to use it, and create it
-4. Copy it. It is shown once and cannot be retrieved afterwards
-
-Do not have an account? Sign up on the same page. A new account starts empty
-and sees only its own records.
-
-## 2. Add the connector
-
-Replace `YOUR_TOKEN` with the token you just copied.
+## 1. Connect
 
 ### Claude Code
 
 ```bash
-claude mcp add --transport http withgrace https://withgrace.getaddis.im/mcp \
-  --header "Authorization: Bearer YOUR_TOKEN"
+claude mcp add --transport http withgrace https://withgrace.getaddis.im/mcp
 ```
+
+A browser opens. Sign in, and you are connected. Nothing to copy.
+
+No account yet? Sign up at
+[withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
+starts empty and sees only its own records.
 
 ### Claude Desktop
 
-`Settings`, `Developer`, `Edit Config`, then:
+`Settings`, `Developer`, `Edit Config`:
 
 ```json
 {
   "mcpServers": {
     "withgrace": {
       "type": "http",
-      "url": "https://withgrace.getaddis.im/mcp",
-      "headers": { "Authorization": "Bearer YOUR_TOKEN" }
+      "url": "https://withgrace.getaddis.im/mcp"
     }
   }
 }
 ```
+
+Restart, then approve the sign in when it prompts.
 
 ### Codex
 
 In `~/.codex/config.toml`:
 
 ```toml
+experimental_use_rmcp_client = true
+
 [mcp_servers.withgrace]
 url = "https://withgrace.getaddis.im/mcp"
-
-[mcp_servers.withgrace.headers]
-Authorization = "Bearer YOUR_TOKEN"
 ```
 
-Restart the client after editing its config.
+Then:
 
-## 3. Add the skill
+```bash
+codex mcp login withgrace
+```
+
+`experimental_use_rmcp_client` is what enables remote servers with sign in.
+
+## 2. Add the skill
 
 The connector gives your assistant the tools. [SKILL.md](SKILL.md) tells it how
 to use them well, which mostly means never inventing a price.
@@ -73,7 +72,7 @@ git clone https://github.com/withgrace-group/withgrace-skill.git \
 For anything else, paste the contents of `SKILL.md` into your assistant's
 instructions.
 
-## 4. Try it
+## 3. Try it
 
 > What properties do I have, and how many units are in each?
 
@@ -87,22 +86,31 @@ Your own records, and only those. Organizations, properties, units, contacts
 and market figures. Every request is authenticated by your token and scoped to
 the account that created it.
 
-## Managing tokens
+## Managing access
 
-Create as many as you like, one per place you use it, so revoking one does not
-disturb the others. Revoke from the same **Connect** page. Revocation is
-immediate.
+Every client you connect gets its own credential, so revoking one does not
+disturb the others. See and revoke them on the **Connect** page after signing
+in. Revocation takes effect immediately.
 
-A token is a credential. It belongs in your client's config file, not in a
-shared document, a screenshot or a repository.
+### Connecting something that has no browser
+
+A script or a scheduled job cannot sign in interactively. Create a token on the
+**Connect** page instead and send it as a header:
+
+```
+Authorization: Bearer YOUR_TOKEN
+```
+
+A token is a credential. It belongs in a config file, not in a shared document,
+a screenshot or a repository.
 
 ## Troubleshooting
 
 **The assistant says it has no With Grace tools.** The client did not load the
 config. Restart it, and check the file is valid JSON or TOML.
 
-**Every call is refused.** The token is wrong, or it has been revoked. Create a
-new one and update the config.
+**Every call is refused.** The connection was revoked, or sign in never
+completed. Remove the server from your client and add it again.
 
 **A tool returns nothing.** There are no records of that kind for your account
 yet. Add one on the site or ask the assistant to create it.
