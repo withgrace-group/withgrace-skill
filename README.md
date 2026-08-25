@@ -50,7 +50,7 @@ No account yet? Sign up at
 [withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
 starts empty and sees only its own records.
 
-### Claude, on the web or desktop
+### Claude on the web, Cowork, or Desktop
 
 `Settings`, `Connectors`, `Add custom connector`, and paste:
 
@@ -77,22 +77,33 @@ Restart, then approve the sign in when it prompts.
 
 ### Codex
 
-In `~/.codex/config.toml`:
-
-```toml
-experimental_use_rmcp_client = true
-
-[mcp_servers.withgrace]
-url = "https://withgrace.getaddis.im/mcp"
-```
-
-Then:
+Two commands, the same shape as Claude Code:
 
 ```bash
+codex mcp add withgrace --url https://withgrace.getaddis.im/mcp
 codex mcp login withgrace
 ```
 
-`experimental_use_rmcp_client` is what enables remote servers with sign in.
+The first registers the connector, the second opens a browser to sign in. Check
+it with `codex mcp get withgrace`.
+
+If you would rather edit the file yourself, `~/.codex/config.toml` takes either
+a header or a token read from the environment:
+
+```toml
+[mcp_servers.withgrace]
+url = "https://withgrace.getaddis.im/mcp"
+http_headers = { Authorization = "Bearer YOUR_TOKEN" }
+```
+
+```toml
+[mcp_servers.withgrace]
+url = "https://withgrace.getaddis.im/mcp"
+bearer_token_env_var = "WITHGRACE_TOKEN"
+```
+
+The second keeps the token out of the file, which is the better habit if the
+file is ever backed up or shared.
 
 ## 2. Add the skill
 
@@ -125,9 +136,13 @@ the account that created it.
 
 ## Managing access
 
-Every client you connect gets its own credential, so revoking one does not
-disturb the others. See and revoke them on the **Connect** page after signing
-in. Revocation takes effect immediately.
+Sign in, open **Settings**, then **Connect**, to see every credential on your
+account and revoke any of them. Revocation takes effect on the next request.
+
+A client that signs in through the browser gets its own credential, so revoking
+it leaves the others alone. A token you create by hand and paste into several
+places is one credential in several files, and revoking it disconnects all of
+them at once.
 
 ### Connecting something that has no browser
 
