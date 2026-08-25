@@ -9,7 +9,44 @@ commands and a sign in.
 
 ## 1. Connect
 
-### Two commands, any agent
+### Claude on the web, Cowork, or Desktop
+
+Nothing to install and no terminal. This is the route for most people.
+
+`Settings`, `Connectors`, `Add custom connector`, and paste:
+
+```
+https://withgrace.getaddis.im/mcp
+```
+
+Then connect, and sign in when prompted.
+
+On a Team or Enterprise plan an owner adds the connector once for the
+organisation, after which each person connects their own account.
+
+No account yet? Sign up at
+[withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
+starts empty and sees only its own records.
+
+For Claude Desktop you can edit the config directly instead:
+
+```json
+{
+  "mcpServers": {
+    "withgrace": {
+      "type": "http",
+      "url": "https://withgrace.getaddis.im/mcp"
+    }
+  }
+}
+```
+
+Restart, then approve the sign in when it prompts.
+
+### Coding agents on your machine
+
+For Claude Code, Codex, Gemini CLI and Cursor, which keep their settings in
+files rather than in an account.
 
 ```bash
 npx withgrace auth login
@@ -42,10 +79,6 @@ config file survives somewhere.
 Verified with Claude Code, Gemini CLI and Codex. Anything else can take the
 block to paste from `npx withgrace connect --print`.
 
-No account yet? Sign up at
-[withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
-starts empty and sees only its own records.
-
 ### Or set up one agent by hand
 
 Every agent can also be pointed at the connector directly, which is useful if
@@ -74,31 +107,6 @@ codex mcp login withgrace
 ```
 
 Check with `codex mcp get withgrace`.
-
-### Claude on the web, Cowork, or Desktop
-
-`Settings`, `Connectors`, `Add custom connector`, and paste:
-
-```
-https://withgrace.getaddis.im/mcp
-```
-
-Then connect, and sign in when prompted.
-
-For Claude Desktop you can edit the config directly instead:
-
-```json
-{
-  "mcpServers": {
-    "withgrace": {
-      "type": "http",
-      "url": "https://withgrace.getaddis.im/mcp"
-    }
-  }
-}
-```
-
-Restart, then approve the sign in when it prompts.
 
 ## 2. Add the skill
 
