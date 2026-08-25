@@ -4,51 +4,76 @@ Connect Claude or Codex to your With Grace records. Ask questions about
 properties, villas, buyers and market figures in the assistant you already use,
 and let it update records for you.
 
-Nothing runs on your machine. The connector is hosted, so setup is a URL and a
-token.
+Nothing runs on your machine. The connector is hosted, so connecting is two
+commands and a sign in.
 
 ## 1. Connect
 
-### Claude Code
+### Two commands, any agent
 
-Two commands. You can paste them, or ask Claude to run them for you: they are
-ordinary shell commands and Claude can run both.
+```bash
+npx withgrace auth login
+npx withgrace connect
+```
+
+The first prints a short code. Open the link it shows, sign in, and approve.
+That sign in is the one step nobody can do on your behalf, because it is your
+password. The second finds the coding agents installed on your machine and
+writes each one's configuration for you.
+
+It needs Node 20 or newer, and it installs nothing permanently.
+
+Check it worked:
+
+```bash
+npx withgrace auth status
+```
+
+You want every agent listed as connected. To disconnect everything and end the
+credential for good:
+
+```bash
+npx withgrace auth logout
+```
+
+That revokes on the server first, so the credential is dead even if a copy of a
+config file survives somewhere.
+
+Verified with Claude Code, Gemini CLI and Codex. Anything else can take the
+block to paste from `npx withgrace connect --print`.
+
+No account yet? Sign up at
+[withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
+starts empty and sees only its own records.
+
+### Or set up one agent by hand
+
+Every agent can also be pointed at the connector directly, which is useful if
+you would rather not run anything.
+
+**Claude Code**
 
 ```bash
 claude mcp add --transport http --scope user withgrace https://withgrace.getaddis.im/mcp
 claude mcp login withgrace
 ```
 
-The first registers the connector. The second opens a browser, where you sign
-in. That sign in is the one step nobody can do on your behalf, because it is
-your password. Everything either side of it is automatic: the client registers
-itself, generates its own keys, and stores the result.
+Check with `claude mcp list`. You want a connected marker. Needs authentication
+means the sign in has not finished.
 
-`--scope user` makes the connector available in every project. Drop it to add
-it to the current project only, which then asks you to trust the project first.
+Over SSH, add `--no-browser` to the login. It prints a URL to open elsewhere and
+waits for you to paste back the address you land on. That needs a real terminal,
+so it will not work from inside an assistant. `npx withgrace auth login` has no
+such limitation, which is why it is the recommended route.
 
-Check it worked:
-
-```bash
-claude mcp list
-```
-
-You want `✔ Connected`. `! Needs authentication` means the login has not
-finished yet.
-
-#### Over SSH, or anywhere without a browser
+**Codex**
 
 ```bash
-claude mcp login withgrace --no-browser
+codex mcp add withgrace --url https://withgrace.getaddis.im/mcp
+codex mcp login withgrace
 ```
 
-It prints a URL. Open it on any machine that has a browser, sign in, and paste
-the address you land on back into the terminal. This needs a real terminal, so
-it will not work from inside an assistant.
-
-No account yet? Sign up at
-[withgrace.getaddis.im](https://withgrace.getaddis.im) first. A new account
-starts empty and sees only its own records.
+Check with `codex mcp get withgrace`.
 
 ### Claude on the web, Cowork, or Desktop
 
@@ -74,36 +99,6 @@ For Claude Desktop you can edit the config directly instead:
 ```
 
 Restart, then approve the sign in when it prompts.
-
-### Codex
-
-Two commands, the same shape as Claude Code:
-
-```bash
-codex mcp add withgrace --url https://withgrace.getaddis.im/mcp
-codex mcp login withgrace
-```
-
-The first registers the connector, the second opens a browser to sign in. Check
-it with `codex mcp get withgrace`.
-
-If you would rather edit the file yourself, `~/.codex/config.toml` takes either
-a header or a token read from the environment:
-
-```toml
-[mcp_servers.withgrace]
-url = "https://withgrace.getaddis.im/mcp"
-http_headers = { Authorization = "Bearer YOUR_TOKEN" }
-```
-
-```toml
-[mcp_servers.withgrace]
-url = "https://withgrace.getaddis.im/mcp"
-bearer_token_env_var = "WITHGRACE_TOKEN"
-```
-
-The second keeps the token out of the file, which is the better habit if the
-file is ever backed up or shared.
 
 ## 2. Add the skill
 
@@ -146,8 +141,9 @@ them at once.
 
 ### Connecting something that has no browser
 
-A script or a scheduled job cannot sign in interactively. Create a token on the
-**Connect** page instead and send it as a header:
+A script or a scheduled job cannot sign in interactively. Sign in once on a
+machine that can, then reuse the credential, or create a token under
+**Settings**, then **Connect**, and send it as a header:
 
 ```
 Authorization: Bearer YOUR_TOKEN
@@ -161,15 +157,21 @@ a screenshot or a repository.
 **The assistant says it has no With Grace tools.** The client did not load the
 config. Restart it, and check the file is valid JSON or TOML.
 
-**Every call is refused.** The connection was revoked, or sign in never
-completed. Run `claude mcp login withgrace` again, or remove the server and add
-it back.
+**Every call is refused.** The connection was revoked, or the sign in never
+finished. Run `npx withgrace auth status` to see which it is, then
+`npx withgrace auth login` again.
 
 **`Failed to connect` with an HTTP code.** The client could not reach the
 connector at all. Check the URL is exactly `https://withgrace.getaddis.im/mcp`.
 
 **`Pending approval`.** The connector was added to a project rather than to
 you. Run `claude` and approve it, or add it again with `--scope user`.
+
+**403 when you test the URL with curl.** Almost always your own network, not
+ours. An unauthenticated request to the connector answers `401` with a
+`WWW-Authenticate` header naming where to sign in. A `403` with no such header
+means something between you and us refused the connection, which is common from
+inside sandboxed containers.
 
 **A tool returns nothing.** There are no records of that kind for your account
 yet. Add one on the site or ask the assistant to create it.
